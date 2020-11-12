@@ -12,6 +12,7 @@ import numpy as np
 import keras
 import utils
 import matplotlib.pyplot as plt
+from PIL import Image
 
 model_path = './models/convnet_model.json'
 weight_path = './models/convnet_weights.h5'
@@ -35,16 +36,26 @@ def load_model():
 
 def main():
     LABELS_NUM, X_train, y_train, X_test, y_test = utils.load_all_data()
-    model = load_model()
-    # print_accuracy(model, X_train, y_train, X_test, y_test)
-    # print loss and val_loss
-    plt.plot(history.history['loss'])
-    plt.plot(history.history['val_loss'])
-    plt.title('model loss')
-    plt.ylabel('loss')
-    plt.xlabel('epoch')
-    plt.legend(['train', 'test'], loc='upper left')
-    plt.show()
+    testing_examples(load_model(), X_test[0:10, ], y_test[0:10, ])
+
+
+def testing_examples(model, inputs, grounds):
+    results = model.predict(inputs)
+    result_keys = np.argmax(results, 1)
+    grounds = np.argmax(grounds, 1)
+    for i in range(inputs.shape[0]):
+        image_matrix = inputs[i, :, :]
+        image_matrix = np.reshape(image_matrix, (28, 28))
+        label_name = utils.get_label_name(result_keys[i])
+        ground = utils.get_label_name(grounds[i])
+        print("LABEL " + str(i) + ":------------" + label_name + "---------------")
+        plt.suptitle("Predict:  " + label_name + "\nGround True: " + ground)
+        plt.gray()
+        plt.imshow(image_matrix)
+        plt.show()
+        input("Type anything to next")
+        plt.close()
+        continue
 
 
 if __name__ == "__main__":

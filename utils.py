@@ -11,6 +11,7 @@ import scipy.stats.stats as stats
 from sklearn.metrics import mean_squared_error
 from math import sqrt
 import h5py
+from keras import utils as np_utils
 
 
 def get_labels_number():
@@ -31,6 +32,19 @@ def load_dataset():
     np.random.shuffle(test_data)
     X_test = test_data[:, 1:].reshape([-1, 28, 28, 1])
     Y_test = test_data[:, 0].astype(np.int32)
+
+    # to categorical
+    Y_train = np_utils.to_categorical(Y_train, num_classes=labels)
+    Y_test = np_utils.to_categorical(Y_test, num_classes=labels)
+
+    with h5py.File('dataset/X_train.h5', 'w') as hf:
+        hf.create_dataset("X_train", data=X_train)
+    with h5py.File('dataset/Y_train.h5', 'w') as hf:
+        hf.create_dataset("Y_train", data=Y_train)
+    with h5py.File('dataset/X_test.h5', 'w') as hf:
+        hf.create_dataset("X_test", data=X_test)
+    with h5py.File('dataset/Y_test.h5', 'w') as hf:
+        hf.create_dataset("Y_test", data=Y_test)
     return labels, X_train, Y_train, X_test, Y_test
 
 
@@ -48,25 +62,38 @@ def plot_compare(label, true_ground, predict, P_corr, RMSE):
     plt.show()
 
 
-def evaluate(ground_truth, predict):
-    # print Pearson product-moment correlation coefficients
-    R, _ = stats.pearsonr(ground_truth.flatten(), predict.flatten())
-    R = round(R, 4)
-    print('Pearson correlation coefficients: ' + str(R))
-    # print ROOT MEAN SQUARED ERROR
-    RMSE = sqrt(mean_squared_error(ground_truth.flatten(), predict.flatten()))
-    RMSE = round(RMSE, 4)
-    print("Root Mean Squared Error: " + str(RMSE))
-    plot_compare('Proposed model', ground_truth, predict, R, RMSE)
-
-
 def load_all_data():
     with h5py.File('dataset/X_train.h5', 'r') as hf:
         X_train = hf['X_train'][:]
-    with h5py.File('dataset/y_train.h5', 'r') as hf:
-        y_train = hf['y_train'][:]
+    with h5py.File('dataset/Y_train.h5', 'r') as hf:
+        y_train = hf['Y_train'][:]
     with h5py.File('dataset/X_test.h5', 'r') as hf:
         X_test = hf['X_test'][:]
-    with h5py.File('dataset/y_test.h5', 'r') as hf:
-        y_test = hf['y_test'][:]
-    return X_train, y_train, X_test, y_test
+    with h5py.File('dataset/Y_test.h5', 'r') as hf:
+        y_test = hf['Y_test'][:]
+    return 10, X_train, y_train, X_test, y_test
+
+
+def get_label_name(key):
+    dictionary = {
+        0: "T - shirt / top",
+        1: "Trouser",
+        2: "Pullover",
+        3: "Dress",
+        4: "Coat",
+        5: "Sandal",
+        6: "Shirt",
+        7: "Sneaker",
+        8: "Bag",
+        9: "Ankle boot"
+    }
+    return dictionary[key]
+
+
+def starting_text():
+    return """             __ _____  __  _____     ___                            _                    _     _             
+  /\/\    /\ \ \\_   \/ _\/__   \   / __\___  _ __ ___  _ __  _   _| |_ ___ _ __  /\   /(_)___(_) ___  _ __  
+ /    \  /  \/ / / /\/\ \   / /\/  / /  / _ \| '_ ` _ \| '_ \| | | | __/ _ \ '__| \ \ / / / __| |/ _ \| '_ \ 
+/ /\/\ \/ /\  /\/ /_  _\ \ / /    / /__| (_) | | | | | | |_) | |_| | ||  __/ |     \ V /| \__ \ | (_) | | | |
+\/    \/\_\ \/\____/  \__/ \/     \____/\___/|_| |_| |_| .__/ \__,_|\__\___|_|      \_/ |_|___/_|\___/|_| |_|
+                                                       |_|                                                   """
