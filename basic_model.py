@@ -57,10 +57,11 @@ def generate_model(labels_number):
     model.add(MaxPooling2D())
 
     model.add(Flatten())
-    model.add(Dense(100))
+    model.add(Dense(200))
     model.add(Activation('relu'))
-    model.add(Dropout(0.2))
-    model.add(Dense(labels_number, activation='softmax'))
+    model.add(Dropout(0.5))
+    model.add(Dense(labels_number))
+    model.add(Activation('softmax'))
 
     compile_model(model)
 

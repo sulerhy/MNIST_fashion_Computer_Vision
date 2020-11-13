@@ -12,11 +12,11 @@ import numpy as np
 import keras
 import utils
 import matplotlib.pyplot as plt
-from PIL import Image
 
 model_path = './models/convnet_model.json'
 weight_path = './models/convnet_weights.h5'
 np.set_printoptions(threshold=sys.maxsize)
+TEST_NUMBER = 50
 
 
 def load_model():
@@ -35,8 +35,9 @@ def load_model():
 
 
 def main():
+    print(utils.starting_text())
     LABELS_NUM, X_train, y_train, X_test, y_test = utils.load_all_data()
-    testing_examples(load_model(), X_test[0:10, ], y_test[0:10, ])
+    testing_examples(load_model(), X_test[0:TEST_NUMBER, ], y_test[0:TEST_NUMBER, ])
 
 
 def testing_examples(model, inputs, grounds):
@@ -53,9 +54,12 @@ def testing_examples(model, inputs, grounds):
         plt.gray()
         plt.imshow(image_matrix)
         plt.show()
-        input("Type anything to next")
-        plt.close()
-        continue
+        input_key = input("Enter to continue, other key to stop")
+        if input_key == "":
+            plt.close()
+            continue
+        else:
+            break
 
 
 if __name__ == "__main__":
